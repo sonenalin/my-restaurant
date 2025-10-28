@@ -10,7 +10,7 @@ export default function HomePage() {
         </h1>
         <p className="text-gray-600 mb-8 text-lg">
           ระบบจัดการหมวดหมู่และสินค้าออนไลน์
-          สร้างด้วย <span className="font-semibold text-blue-600">Next.js + Tailwind CSS</span> 🚀
+          ສ້າງດ້ວຍ <span className="font-semibold text-blue-600">Next.js + Tailwind CSS</span> 🚀
         </p>
 
         {/* ปุ่มนำทาง */}
