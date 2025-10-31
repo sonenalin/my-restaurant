@@ -59,6 +59,7 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
+
   };
 
   // ✅ ฟังก์ชันจัดการ URL รูปภาพ

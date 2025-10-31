@@ -13,11 +13,16 @@ export default function CategoryPage() {
 				if (!res.ok) throw new Error("Error fetching categories");
 				const data = await res.json();
 				setCategories(data);
-			} catch (err: any) {
-				setError(err.message);
+			} catch (err) {
+				if (err instanceof Error) {
+					setError(err.message);
+				} else {
+					setError(String(err));
+				}
 			} finally {
 				setLoading(false);
 			}
+
 		};
 		fetchCategories();
 	}, []);
