@@ -26,8 +26,11 @@ export default function HomePage() {
         setCategories(catData);
         setAllProducts(prodData);
       } catch (err) {
-        if (err instanceof Error) setError(err.message);
-        else setError(String(err));
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(String(err));
+        }
       } finally {
         setLoading(false);
       }
