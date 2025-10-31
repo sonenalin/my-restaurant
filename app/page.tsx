@@ -5,10 +5,11 @@ import Link from "next/link";
 
 export default function HomePage() {
   const [categories, setCategories] = useState<any[]>([]);
-  const [allProducts, setAllProducts] = useState<any[]>([]); // ✅ เก็บสินค้าทั้งหมดไว้ที่นี่
+  const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   // ✅ โหลดข้อมูลเริ่มต้นจาก API
   useEffect(() => {
@@ -23,9 +24,10 @@ export default function HomePage() {
         const prodData = await prodRes.json();
 
         setCategories(catData);
-        setAllProducts(prodData); // ✅ เก็บไว้ใน state เดียว ไม่แก้ไขตรงนี้อีก
-      } catch (error) {
-        console.error("❌ Error loading data:", error);
+        setAllProducts(prodData);
+      } catch (err) {
+        if (err instanceof Error) setError(err.message);
+        else setError(String(err));
       } finally {
         setLoading(false);
       }
@@ -34,7 +36,7 @@ export default function HomePage() {
     fetchData();
   }, []);
 
-  // ✅ ฟังก์ชันค้นหาสินค้าจาก API
+  // ✅ ค้นหาสินค้าจาก API
   const fetchProducts = async (keyword = "") => {
     setLoading(true);
     try {
@@ -44,22 +46,23 @@ export default function HomePage() {
         )}`
       );
       const data = await res.json();
-      setAllProducts(data); // ✅ อัปเดต allProducts เมื่อค้นหา
-    } catch (error) {
-      console.error("Error fetching products:", error);
+      setAllProducts(data);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError(String(err));
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ แปลง URL รูปภาพให้สมบูรณ์ก่อนแสดง
+  // ✅ ฟังก์ชันจัดการ URL รูปภาพ
   const getImageUrl = (url: string) => {
     if (!url) return "/no-image.png";
     const cleanPath = url.replace("../", "");
     return `https://nalongview.codelao.com/pages/${cleanPath}`;
   };
 
-  // ✅ ฟังก์ชันกรองสินค้าตามหมวดหมู่ (ใช้ useMemo ป้องกัน re-render ซ้ำ)
+  // ✅ ฟังก์ชันกรองสินค้า (ใช้ useMemo ป้องกัน re-render)
   const filteredProducts = useMemo(() => {
     let result = allProducts;
 
@@ -71,16 +74,25 @@ export default function HomePage() {
 
     if (search.trim() !== "") {
       result = result.filter((item) =>
-        item.product_name.toLowerCase().includes(search.toLowerCase())
+        item.product_name?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
     return result;
   }, [allProducts, selectedCategory, search]);
 
+  // ✅ แสดงข้อความ error
+  if (error) {
+    return (
+      <div className="text-center text-red-500 mt-20 text-lg">
+        ❌ ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ: {error}
+      </div>
+    );
+  }
+
   if (loading)
     return (
-      <div className="text-center text-gray-500 mt-20 text-lg">
+      <div className="text-center text-gray-500 mt-20 text-lg animate-pulse">
         ⏳ ກຳລັງໂຫຼດຂໍ້ມູນ...
       </div>
     );
@@ -156,20 +168,21 @@ export default function HomePage() {
               >
                 <div className="relative w-full h-44 mb-3 overflow-hidden rounded-lg">
                   <img
-                    src={encodeURI(getImageUrl(item.img_url))} // ✅ ป้องกัน space และ reload
+                    src={encodeURI(getImageUrl(item.img_url))}
                     alt={item.product_name}
-                    loading="lazy" // ✅ Lazy load (ไม่โหลดทั้งหมดพร้อมกัน)
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     onError={(e) => (e.currentTarget.src = "/no-image.png")}
                   />
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-800">
+                <h3 className="text-lg font-semibold text-gray-800 truncate">
                   {item.product_name}
                 </h3>
 
                 {item.product_name_en && (
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 text-sm truncate">
                     {item.product_name_en}
                   </p>
                 )}
