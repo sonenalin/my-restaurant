@@ -48,8 +48,11 @@ export default function HomePage() {
       const data = await res.json();
       setAllProducts(data);
     } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else setError(String(err));
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
     } finally {
       setLoading(false);
     }
